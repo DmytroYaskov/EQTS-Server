@@ -10,6 +10,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type record struct {
+	id          int
+	device      int
+	temperature float32
+}
+
 func main() {
 	log.Println("App started")
 	os.Remove("app.db")
@@ -31,7 +37,8 @@ func main() {
 		insertRecord(sqliteDatabase, rand.Int(), rand.Float32())
 	}
 
-	displayRecords(sqliteDatabase)
+	// displayRecords(sqliteDatabase)
+	log.Printf("%d", len(getRecords(sqliteDatabase)))
 }
 
 func initDatabase(db *sql.DB) {
@@ -64,6 +71,22 @@ func insertRecord(db *sql.DB, deviceID int, temperature float32) {
 	}
 }
 
+func getRecords(db *sql.DB) []record {
+	row, err := db.Query("SELECT * FROM records ORDER BY idRecord DESC")
+	if err != nil {
+		log.Print("Error while getting")
+		log.Fatal(err.Error())
+	}
+	defer row.Close()
+	var records []record
+	for row.Next() {
+		var newRecord record
+		row.Scan(&newRecord.id, &newRecord.device, &newRecord.temperature)
+		records = append(records, newRecord)
+	}
+	return records
+}
+
 func displayRecords(db *sql.DB) {
 	row, err := db.Query("SELECT * FROM records ORDER BY idRecord DESC")
 	if err != nil {
@@ -79,3 +102,5 @@ func displayRecords(db *sql.DB) {
 		log.Println("Record:", record, " Device:", device, " Temperature:", temperature)
 	}
 }
+
+// djfkjgdhskjng
